@@ -1,0 +1,35 @@
+stages:
+  - performancetest
+
+test-loadrunner:
+  stage: performancetest
+  tags:
+    - windows
+  timeout: 3h
+  when: manual
+  allow_failure: false
+
+  before_script:
+    # Ensure Python is available (adjust path if needed)
+    - $env:PATH += ";C:\Python39"
+    - python --version
+
+  script:
+    - echo "Running Python script on Windows runner"
+
+    # Optional: bypass execution policy (safe for CI)
+    - Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+
+    # Run your script
+    - python .\scripts\CI_CD.py
+
+    # Print artifact URL
+    - Write-Host "LoadRunner Report URL :" "https://gitlab.com/-/<project>/<repo>/-/jobs/$env:CI_JOB_ID/artifacts/Artifacts/Report.html" -ForegroundColor Red
+
+  artifacts:
+    name: "loadrunner-report"
+    when: always
+    paths:
+      - Artifacts/Report.html
+      - Artifacts/Report/
+    expire_in: 1 week
